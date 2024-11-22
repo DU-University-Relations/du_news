@@ -1,0 +1,811 @@
+<?php
+
+/**
+ * @file
+ * Description.
+ */
+
+use Drupal\Core\Database\Query\Condition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Drupal\paragraphs\Entity\Paragraph;
+use Drupal\views\Views;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function du_article_node_form_system_site_information_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $config = \Drupal::config('du_article_node.settings');
+
+  $form['articles_node'] = [
+    '#type' => 'details',
+    '#title' => t('Article Page'),
+    '#open' => TRUE,
+  ];
+
+  $form['articles_node']['article_list_location'] = [
+    '#type' => 'entity_autocomplete',
+    '#target_type' => 'node',
+    '#title' => t('Article List Page Location'),
+    '#description' => t('URL to Article List.'),
+  ];
+
+  $form['articles_category'] = [
+    '#type' => 'details',
+    '#title' => t('Articles Category Path  (/example/url/path/)'),
+    '#open' => TRUE,
+  ];
+
+  $form['articles_category']['article_category_location'] = [
+    '#type' => 'textfield',
+    '#title' => t('Article Category Path'),
+  ];
+
+  if (!empty($config->get('article_list_location'))) {
+    $value = Node::load((int) $config->get('article_list_location'));
+    if (!empty($value)) {
+      $form['articles_node']['article_list_location']['#default_value'] = $value;
+    }
+  }
+
+  if (!empty($config->get('article_category_location'))) {
+    $form['articles_category']['article_category_location']['#default_value'] = $config->get('article_category_location');
+  }
+
+  $form['#submit'][] = 'du_article_node_site_information_settings_form_submit';
+}
+
+/**
+ * Custom form submission handler for site information form.
+ */
+function du_article_node_site_information_settings_form_submit(array &$form, FormStateInterface $form_state) {
+  $values = $form_state->getValues();
+  $config = \Drupal::configFactory()->getEditable('du_article_node.settings');
+  $config->set('article_list_location', $values['article_list_location'])->save();
+  $config->set('article_category_location', $values['article_category_location'])->save();
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function du_article_node_preprocess_node__article(&$variables) {
+  $settings = \Drupal::config('du_article_node.settings');
+  if (!empty($settings->get('article_list_location'))) {
+    $article_list_node = Node::load((int) $settings->get('article_list_location'));
+    if (!empty($article_list_node)) {
+      $id = ['node' => $article_list_node->id()];
+      $url = Url::fromRoute("entity.node.canonical", $id, ['absolute' => TRUE])
+        ->toString();
+      $variables['article_list_location'] = $url;
+    }
+  }
+  if (!empty($settings->get('article_category_location'))) {
+    $variables['article_category_location'] = $settings->get('article_category_location');
+  }
+  if (\Drupal::moduleHandler()->moduleExists('du_inline_unit')) {
+    if (isset($variables['node']) && $variables['node'] instanceof NodeInterface) {
+      $inline_unit = du_inline_unit_get_inline_unit($variables['node']);
+      if (!empty($inline_unit->field_article_list_page->entity)) {
+        $article_list_node = Node::load($inline_unit->field_article_list_page->entity->id());
+        $id = ['node' => $article_list_node->id()];
+        $url = Url::fromRoute("entity.node.canonical", $id, ['absolute' => TRUE])->toString();
+        $variables['article_list_location'] = $url;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function du_article_node_form_views_exposed_form_alter(&$form, $form_state) {
+  $storage = $form_state->getStorage();
+  if (!empty($storage['view'])) {
+    $view = $storage['view'];
+
+    if ($view->id() == 'article_list' && $view->current_display == 'block_1') {
+      // Get filters.
+      $filters = $view->display_handler->getOption('filters');
+      // Get all request parameters.
+      $params = \Drupal::request()->request->all();
+
+      // Ensure the action points to the current page. If the request path is
+      // /views/ajax, then we need to get the referer to get the actual page.
+      $request = \Drupal::request();
+      $form['#action'] = $request->getPathInfo();
+      if ($form['#action'] == '/views/ajax') {
+        $referer = $request->server->get('HTTP_REFERER');
+        $form['#action'] = substr($referer, strpos($referer, '/', 8));
+      }
+
+      $form['actions']['reset'] = [
+        '#type' => 'button',
+        '#value' => t('Reset Filters'),
+        '#weight' => 10,
+        '#attributes' => [
+          'class' => [
+            'form-submit',
+          ],
+          'id' => 'views-reset-button',
+        ],
+      ];
+
+      $category_preselected_count = 0;
+      $topic_preselected_count = 0;
+
+      if (is_numeric($view->args[0])) {
+        // Limit the terms displayed to only ones that are linked to nodes.
+        // If the admin chose specific terms to show, then limit it
+        // just to those ones.
+        $paragraph = Paragraph::load($view->args[0]);
+        if (!empty($paragraph) && $paragraph->get('field_article_list_category')->count() > 1) {
+          $categories = array_column($paragraph->get('field_article_list_category')->getValue(), 'target_id');
+          $categories_preselected_list_options = _du_site_get_term_names(array_flip($categories));
+        }
+        if (!empty($paragraph) && $paragraph->get('field_article_list_topic')->count() > 1) {
+          $topics = array_column($paragraph->get('field_article_list_topic')->getValue(), 'target_id');
+          $topics_preselected_list_options = _du_site_get_term_names(array_flip($topics));
+        }
+      }
+
+      $category_preselected_count = $paragraph->get('field_article_list_category')->count();
+      $topic_preselected_count = $paragraph->get('field_article_list_topic')->count();
+
+      // Set default params.
+      $default_article_params = [];
+      $default_article_params['field_article_type_target_id'] = "All";
+      $default_article_params['content_tags_tid_depth'] = "All";
+      $default_article_params['field_article_category_target_id'] = "All";
+      $default_article_params['field_article_byline_author_target_id'] = "All";
+      $default_article_params['field_article_topic_target_id'] = "All";
+
+      // Set preselected type and content tag for default search.
+      $default_article_params["preselected_type"] = array_column($paragraph->get('field_article_list_type')->getValue(), 'target_id');
+      $default_article_params["preselected_content_tag"] = array_column($paragraph->get('field_article_list_content_tag')->getValue(), 'target_id');
+
+      // Get all articles for the default article params.
+      $default_articles = _du_article_get_article_filter_options($default_article_params);
+
+      // Set the default filter options first.
+      if ($category_preselected_count > 1) {
+        // If multiple preselected backend categories, list them as
+        // options and no change.
+        $form['field_article_category_target_id']['#options'] = $categories_preselected_list_options;
+      }
+      else {
+        $form['field_article_category_target_id']['#options'] = $default_articles['category_options'];
+      }
+
+      if ($topic_preselected_count > 1) {
+        // If multiple preselected backend topics, list them as
+        // options and no change.
+        $form['field_article_topic_target_id']['#options'] = $topics_preselected_list_options;
+      }
+      else {
+        $form['field_article_topic_target_id']['#options'] = $default_articles['topic_options'];
+      }
+
+      $form['field_article_byline_author_target_id']['#options'] = $default_articles['author_options'];
+
+      // Get the selected article category, topic, and author if any.
+      $article_category = $params['field_article_category_target_id'] ?? NULL;
+      $article_topic = $params['field_article_topic_target_id'] ?? NULL;
+      $article_author = $params['field_article_byline_author_target_id'] ?? NULL;
+
+      if (empty($article_category)) {
+        if (!empty($filters['field_article_category_target_id']['value'][0])) {
+          $article_category = $filters['field_article_category_target_id']['value'][0];
+        }
+      }
+      if (empty($article_topic)) {
+        if (!empty($filters['field_article_topic_target_id']['value'][0])) {
+          $article_topic = $filters['field_article_topic_target_id']['value'][0];
+        }
+      }
+      if (empty($article_author)) {
+        if (!empty($filters['field_article_byline_author_target_id']['value'][0])) {
+          $article_author = $filters['field_article_byline_author_target_id']['value'][0];
+        }
+      }
+
+      // If filter values are NULL, set them to 'All'.
+      if (is_null($article_category)) {
+        $article_category = 'All';
+      }
+      if (is_null($article_author)) {
+        $article_author = 'All';
+      }
+      if (is_null($article_topic)) {
+        $article_topic = 'All';
+      }
+
+      // Set preselected filter values from backend.
+      $params["preselected_categories"] = array_column($paragraph->get('field_article_list_category')->getValue(), 'target_id');
+      $params["preselected_topics"] = array_column($paragraph->get('field_article_list_topic')->getValue(), 'target_id');
+      $params["preselected_author"] = array_column($paragraph->get('field_article_list_author')->getValue(), 'target_id');
+      $params["preselected_type"] = array_column($paragraph->get('field_article_list_type')->getValue(), 'target_id');
+      $params["preselected_content_tag"] = array_column($paragraph->get('field_article_list_content_tag')->getValue(), 'target_id');
+
+      // Call function to get all articles for the selected params
+      // including preselected filter values.
+      $articles = _du_article_get_article_filter_options($params);
+
+      // Set and find logics for when to update a filter options and
+      // when to used default list of filter option.
+      $category_option_update = TRUE;
+      $author_option_update = TRUE;
+      $topic_option_update = TRUE;
+      $category_default_options = FALSE;
+      $author_default_options = FALSE;
+      $topic_default_options = FALSE;
+
+      if (($article_category != 'All') && ($article_author == 'All') && ($article_topic == 'All')) {
+        $category_default_options = TRUE;
+        if (isset($params['_triggering_element_name']) && $params['_triggering_element_name'] == 'field_article_category_target_id') {
+          $category_option_update = FALSE;
+        }
+      }
+      elseif (($article_category == 'All') && ($article_author == 'All') && ($article_topic != 'All')) {
+        $topic_default_options = TRUE;
+        if (isset($params['_triggering_element_name']) && $params['_triggering_element_name'] == 'field_article_topic_target_id') {
+          $topic_option_update = FALSE;
+        }
+      }
+      elseif (($article_category == 'All') && ($article_author != 'All') && ($article_topic == 'All')) {
+        $author_default_options = TRUE;
+        if (isset($params['_triggering_element_name']) && $params['_triggering_element_name'] == 'field_article_byline_author_target_id') {
+          $author_option_update = FALSE;
+        }
+      }
+      elseif (($article_category == 'All') && ($article_author == 'All') && ($article_topic == 'All')) {
+        $category_default_options = TRUE;
+        $author_default_options = TRUE;
+        $topic_default_options = TRUE;
+      }
+
+      // Process for Category options.
+      if ($category_option_update) {
+        if ($category_preselected_count < 2) {
+          // Display default options.
+          if ($category_default_options) {
+            if (isset($default_articles['category_options']) && !empty($default_articles['category_options'])) {
+              $form['field_article_category_target_id']['#options'] = $default_articles['category_options'];
+              if (!empty($article_category)) {
+                $form['field_article_category_target_id']['#value'] = $article_category;
+              }
+              else {
+                $form['field_article_category_target_id']['#value'] = '';
+              }
+            }
+            else {
+              $form['field_article_category_target_id']['#options'] = ['All' => 'View all'];
+              $form['field_article_category_target_id']['#value'] = '';
+            }
+          }
+          else {
+            // Display updated and prefiltered options.
+            if (isset($articles['category_options']) && !empty($articles['category_options'])) {
+              $form['field_article_category_target_id']['#options'] = $articles['category_options'];
+              if (!empty($article_category)) {
+                $form['field_article_category_target_id']['#value'] = $article_category;
+              }
+              else {
+                $form['field_article_category_target_id']['#value'] = '';
+              }
+            }
+            else {
+              $form['field_article_category_target_id']['#options'] = ['All' => 'View all'];
+              $form['field_article_category_target_id']['#value'] = '';
+            }
+          }
+        }
+        else {
+          // If multiple preselected backend categories, list them as
+          // options and no change.
+          $form['field_article_category_target_id']['#options'] = $categories_preselected_list_options;
+        }
+      }
+
+      // Process for Topic options.
+      if ($topic_option_update) {
+        if ($topic_preselected_count < 2) {
+          if ($topic_default_options) {
+            // Display default options.
+            if (isset($default_articles['topic_options']) && !empty($default_articles['topic_options'])) {
+              $form['field_article_topic_target_id']['#options'] = $default_articles['topic_options'];
+              if (!empty($article_topic)) {
+                $form['field_article_topic_target_id']['#value'] = $article_topic;
+              }
+              else {
+                $form['field_article_topic_target_id']['#value'] = '';
+              }
+            }
+            else {
+              $form['field_article_topic_target_id']['#options'] = ['All' => 'View all'];
+              $form['field_article_topic_target_id']['#value'] = '';
+            }
+          }
+          else {
+            // Display updated and prefiltered options.
+            if (isset($articles['topic_options']) && !empty($articles['topic_options'])) {
+              $form['field_article_topic_target_id']['#options'] = $articles['topic_options'];
+              if (!empty($article_topic)) {
+                $form['field_article_topic_target_id']['#value'] = $article_topic;
+              }
+              else {
+                $form['field_article_topic_target_id']['#value'] = '';
+              }
+            }
+            else {
+              $form['field_article_topic_target_id']['#options'] = ['All' => 'View all'];
+              $form['field_article_topic_target_id']['#value'] = '';
+            }
+          }
+        }
+        else {
+          // If multiple preselected backend topics, list them as
+          // options and no change.
+          $form['field_article_topic_target_id']['#options'] = $topics_preselected_list_options;
+        }
+      }
+
+      // Process for Author options.
+      if ($author_option_update) {
+        if ($author_default_options) {
+          // Display default options.
+          if (isset($default_articles['author_options']) && !empty($default_articles['author_options'])) {
+            $form['field_article_byline_author_target_id']['#options'] = $default_articles['author_options'];
+            if (!empty($article_author)) {
+              $form['field_article_byline_author_target_id']['#value'] = $article_author;
+            }
+            else {
+              $form['field_article_byline_author_target_id']['#value'] = '';
+            }
+          }
+          else {
+            $form['field_article_byline_author_target_id']['#options'] = ['All' => 'View all'];
+            $form['field_article_byline_author_target_id']['#value'] = '';
+          }
+        }
+        else {
+          // Display updated and prefiltered options.
+          if (isset($articles['author_options']) && !empty($articles['author_options'])) {
+            $form['field_article_byline_author_target_id']['#options'] = $articles['author_options'];
+            if (!empty($article_author)) {
+              $form['field_article_byline_author_target_id']['#value'] = $article_author;
+            }
+            else {
+              $form['field_article_byline_author_target_id']['#value'] = '';
+            }
+          }
+          else {
+            $form['field_article_byline_author_target_id']['#options'] = ['All' => 'View all'];
+            $form['field_article_byline_author_target_id']['#value'] = '';
+          }
+        }
+      }
+
+      // Set up Ajax Callback for Category, Author, and Topic filters
+      // Add on change Ajax event to category filter.
+      $form['field_article_category_target_id']['#ajax'] = [
+        'event' => 'change',
+        'callback' => '_du_article_ajax_get_filter_options',
+        'method' => 'replace',
+        'wrapper' => 'article-list-form-prefix',
+        'url' => Url::fromUri('internal:' . $form['#action']),
+        'options' => ['query' => ['ajax_form' => 1]],
+        'progress' => [
+          'type' => 'throbber',
+          'message' => t('Retrieving filter options...'),
+        ],
+      ];
+
+      // Add on change Ajax event to topic filter.
+      $form['field_article_topic_target_id']['#ajax'] = [
+        'event' => 'change',
+        'callback' => '_du_article_ajax_get_filter_options',
+        'method' => 'replace',
+        'wrapper' => 'article-list-form-prefix',
+        'url' => Url::fromUri('internal:' . $form['#action']),
+        'options' => ['query' => ['ajax_form' => 1]],
+        'progress' => [
+          'type' => 'throbber',
+          'message' => t('Retrieving filter options...'),
+        ],
+      ];
+
+      // Add on change Ajax event to author filter.
+      $form['field_article_byline_author_target_id']['#ajax'] = [
+        'event' => 'change',
+        'callback' => '_du_article_ajax_get_filter_options',
+        'method' => 'replace',
+        'wrapper' => 'article-list-form-prefix',
+        'url' => Url::fromUri('internal:' . $form['#action']),
+        'options' => ['query' => ['ajax_form' => 1]],
+        'progress' => [
+          'type' => 'throbber',
+          'message' => t('Retrieving filter options...'),
+        ],
+      ];
+
+      $form['#prefix'] = '<div id="article-list-form-prefix">';
+      $form['#suffix'] = '</div>';
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph_PARAGRAPH_ID().
+ */
+function du_article_node_preprocess_paragraph__article_list(&$vars) {
+  $paragraph = $vars['paragraph'];
+  $view = Views::getView('article_list');
+  if (is_object($view)) {
+    $view->setArguments([$paragraph->id()]);
+    $view->setDisplay('block_1');
+    $filters = $view->display_handler->getOption('filters');
+    $exposed_filters = [];
+
+    if (!empty($paragraph->get('field_article_list_author')->target_id)) {
+      $prefilter_author = array_column($paragraph->get('field_article_list_author')->getValue(), 'target_id');
+      if (empty($filters['field_article_byline_author_target_id']['value'])) {
+        $filters['field_article_byline_author_target_id']['value'] = $prefilter_author;
+        $exposed_filters['field_article_byline_author_target_id'] = $prefilter_author;
+      }
+    }
+
+    // Set the default category if only one is selected.
+    if ($paragraph->get('field_article_list_category')->count() == 1) {
+      $prefilter_category = array_column($paragraph->get('field_article_list_category')->getValue(), 'target_id');
+      if (empty($filters['field_article_category_target_id']['value'])) {
+        $filters['field_article_category_target_id']['value'] = $prefilter_category;
+        $exposed_filters['field_article_category_target_id'] = $prefilter_category;
+      }
+    }
+
+    // Set the default topic if only one is selected.
+    if ($paragraph->get('field_article_list_topic')->count() == 1) {
+      $prefilter_topic = array_column($paragraph->get('field_article_list_topic')->getValue(), 'target_id');
+      if (empty($filters['field_article_topic_target_id']['value'])) {
+        $filters['field_article_topic_target_id']['value'] = $prefilter_topic;
+        $exposed_filters['field_article_topic_target_id'] = $prefilter_topic;
+      }
+    }
+
+    if (!empty($paragraph->get('field_article_list_type')->target_id)) {
+      $prefilter_article_type = $paragraph->get('field_article_list_type')->target_id;
+      if (empty($filters['field_article_type_target_id']['value'])) {
+        $filters['field_article_type_target_id']['value'] = $prefilter_article_type;
+        $exposed_filters['field_article_type_target_id'] = $prefilter_article_type;
+      }
+    }
+
+    if (!empty($paragraph->get('field_article_list_content_tag')->target_id)) {
+      $prefilter_content_tag = $paragraph->get('field_article_list_content_tag')->target_id;
+      if (empty($filters['term_node_tid_depth_1']['value'])) {
+        $filters['term_node_tid_depth_1']['value'] = $prefilter_content_tag;
+        $exposed_filters['content_tags_tid_depth'] = $prefilter_content_tag;
+      }
+    }
+
+    if (!empty($exposed_filters)) {
+      $view->setExposedInput($exposed_filters);
+    }
+
+    $view->display_handler->setOption('filters', $filters);
+    $view->preExecute();
+    $view->execute();
+    $content = $view->buildRenderable('block_1', []);
+    $vars['content']['article_list_view'] = $content;
+  }
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function du_article_node_field_widget_form_alter(&$element, &$form_state, $context) {
+  $field_name = $context['items']->getName();
+
+  // Limit the terms available to choose to only ones that are
+  // linked to article nodes.
+  if ($field_name == 'field_article_list_category') {
+    $categories = _du_site_get_terms('article_categories', 'article', 'field_article_category');
+    unset($categories['All']);
+    $categories = ['_none' => '- None -'] + $categories;
+    $element['#options'] = $categories;
+  }
+  elseif ($field_name == 'field_article_list_topic') {
+    $topics = _du_site_get_terms('topic', 'article', 'field_article_topic');
+    unset($topics['All']);
+    $topics = ['_none' => '- None -'] + $topics;
+    $element['#options'] = $topics;
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function du_article_node_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() == 'article_list') {
+
+    // Start Author query altering section, get selected Author if any.
+    $author_value = '';
+    foreach ($query->where as $top_index => $where) {
+      foreach ($where['conditions'] as $bottom_index => $condition) {
+        if ($condition['field'] == 'node__field_article_byline_author.field_article_byline_author_target_id = :node__field_article_byline_author_field_article_byline_author_target_id') {
+
+          $author_value = $condition['value'][':node__field_article_byline_author_field_article_byline_author_target_id'];
+          unset($query->where[$top_index]['conditions'][$bottom_index]);
+        }
+      }
+    }
+
+    // Simulate Author In Depth search for selected Author.
+    if ($author_value != '') {
+      $tid = intval($author_value);
+      $unique_author_ids[] = $tid;
+      // Get all child for this $tid and add child tid
+      // if not already in author list.
+      $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadChildren($tid);
+      foreach ($terms as $term) {
+        if (!in_array($term->get('tid')->value, $unique_author_ids)) {
+          $unique_author_ids[] = intval($term->get('tid')->value);
+        }
+      }
+
+      // Add in Author conditon to be an IN condition simulating In Depth.
+      $condition = new Condition('AND');
+      $table_alias = $query->ensureTable('node__field_article_byline_author', NULL);
+      $db_field = $table_alias . '.field_article_byline_author_target_id';
+      $condition->condition($db_field, $unique_author_ids, 'IN');
+      $query->addWhere('0', $condition);
+    } // End Author query altering section.
+
+    if (is_numeric($view->args[0])) {
+      // If the paragraph limits categories/topics to certain terms (more than
+      // one) and the filter is chosen to show 'All', then we need to
+      // still filter on terms that were selected in the paragraph.
+      $paragraph = Paragraph::load($view->args[0]);
+      if (!empty($paragraph) && $paragraph->get('field_article_list_category')->count() > 1) {
+        $input = $view->getExposedInput();
+        if (empty($input['field_article_category_target_id']) || $input['field_article_category_target_id'] == 'All') {
+          $terms = array_column($paragraph->get('field_article_list_category')->getValue(), 'target_id');
+          $condition = new Condition('AND');
+          $table_alias = $query->ensureTable('node__field_article_category', NULL);
+          $db_field = $table_alias . '.field_article_category_target_id';
+          $condition->condition($db_field, $terms, 'IN');
+          $query->addWhere('0', $condition);
+        }
+      }
+      if (!empty($paragraph) && $paragraph->get('field_article_list_topic')->count() > 1) {
+        $input = $view->getExposedInput();
+        if (empty($input['field_article_topic_target_id']) || $input['field_article_topic_target_id'] == 'All') {
+          $terms = array_column($paragraph->get('field_article_list_topic')->getValue(), 'target_id');
+          $condition = new Condition('AND');
+          $table_alias = $query->ensureTable('node__field_article_topic', NULL);
+          $db_field = $table_alias . '.field_article_topic_target_id';
+          $condition->condition($db_field, $terms, 'IN');
+          $query->addWhere('0', $condition);
+        }
+      }
+    }
+
+    // For Article Listing, modify query to group by the node id to remove
+    // duplicates.
+    $query->addField('node', 'nid', 'node_nid', ['function' => 'groupby']);
+    $query->addGroupBy('node.nid');
+  }
+}
+
+/**
+ * Ajax Callback function to get update the filter options.
+ *
+ * @param array $form
+ *   The form array.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state object.
+ *
+ * @return array
+ *   The form array containing the updated filter options.
+ */
+function _du_article_ajax_get_filter_options(array $form, FormStateInterface $form_state) {
+  // Special hack code.
+  // This weird error shows up sometime so remove similar error from showing.
+  // Error: The selected image "avery-hitchcock-350x400.jpg" is invalid.
+  $errors = \Drupal::messenger()->messagesByType('error');
+  if (!empty($errors)) {
+    foreach ($errors as $error) {
+      $my_error_str1 = 'The selected image "';
+      $my_error_str2 = '" is invalid.';
+
+      // If error does not have both of above string,
+      // add them back into error message array.
+      if (!str_contains($error, $my_error_str1) && !str_contains($error, $my_error_str2)) {
+        \Drupal::messenger()->addError($message);
+      }
+    }
+  }
+
+  // Logic codes changing form filter options are in exposed form alter hook.
+  // Return the form.
+  return $form;
+}
+
+/**
+ * Returns filter options for category, topic, and author.
+ *
+ * @param array $params
+ *   The array of parameters for articles.
+ *
+ * @return array
+ *   Array of articles filter options.
+ *
+ * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+ */
+function _du_article_get_article_filter_options(array $params = NULL) {
+  // Array of options to return.
+  $ret_array = [];
+  $ret_array['category_options'] = [];
+  $ret_array['author_options'] = [];
+  $ret_array['topic_options'] = [];
+
+  // Create query to get all article nodes.
+  $query = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->condition('status', 1);
+
+  // Check for selected filter Cagetory target and add condition if
+  // category target is not All.
+  if (isset($params['field_article_category_target_id']) && $params['field_article_category_target_id'] !== 'All') {
+    $query->condition('field_article_category.target_id', intval($params['field_article_category_target_id']));
+  }
+  elseif (isset($params['preselected_categories']) && !empty($params['preselected_categories'])) {
+    // If there are preselected categories (either multiple or single
+    // preselected) add condition to be an IN for the preselected categories.
+    $query->condition('field_article_category.target_id', $params['preselected_categories'], 'IN');
+  }
+
+  // Check for selected filter Topic target and add condition if
+  // topic target is not All.
+  if (isset($params['field_article_topic_target_id']) && $params['field_article_topic_target_id'] !== 'All') {
+    $query->condition('field_article_topic.target_id', intval($params['field_article_topic_target_id']));
+  }
+  elseif (isset($params['preselected_topics']) && !empty($params['preselected_topics'])) {
+    // If there are preselected topics (either multiple or single preselected)
+    // add condition to be an IN for the preselected topics.
+    $query->condition('field_article_topic.target_id', $params['preselected_topics'], 'IN');
+  }
+
+  // Check for selected filter Author target and add condition if
+  // author target is not All.
+  $author_target_id = '';
+  if (isset($params['field_article_byline_author_target_id']) && $params['field_article_byline_author_target_id'] !== 'All') {
+    $author_target_id = intval($params['field_article_byline_author_target_id']);
+  }
+  elseif (isset($params['preselected_author']) && !empty($params['preselected_author'])) {
+    // If there is a preselected author, add condition to be an IN
+    // for the preselected author.
+    $author_target_id = intval($params['preselected_author'][0]);
+  }
+
+  // Process for child authors if any and add condition.
+  if (is_numeric($author_target_id) && !empty($author_target_id)) {
+
+    $unique_author_ids[] = $author_target_id;
+
+    // Get all child for this author and add child tid if not already in list.
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadChildren($author_target_id);
+    foreach ($terms as $term) {
+      if (!in_array($term->get('tid')->value, $unique_author_ids)) {
+        $unique_author_ids[] = $term->get('tid')->value;
+      }
+    }
+
+    $query->condition('field_article_byline_author.target_id', $unique_author_ids, 'IN');
+  }
+
+  // Type target are only preselected in backend and always in request params.
+  if (isset($params['field_article_type_target_id']) && $params['field_article_type_target_id'] !== 'All') {
+    $query->condition('field_article_type.target_id', $params['field_article_type_target_id']);
+  }
+  elseif (isset($params['preselected_type']) && !empty($params['preselected_type'])) {
+    $query->condition('field_article_type.target_id', intval($params['preselected_type'][0]));
+  }
+
+  // Content Tag target.
+  $content_tag_target_id = '';
+  if (isset($params['content_tags_tid_depth']) && $params['content_tags_tid_depth'] !== 'All') {
+    $content_tag_target_id = intval($params['content_tags_tid_depth']);
+  }
+  elseif (isset($params['preselected_content_tag']) && !empty($params['preselected_content_tag'])) {
+    $content_tag_target_id = intval($params['preselected_content_tag'][0]);
+  }
+
+  // Process for child content tags if any and add condition.
+  if (is_numeric($content_tag_target_id) && !empty($content_tag_target_id)) {
+
+    $unique_content_tag_ids[] = $content_tag_target_id;
+
+    // Get all child for this content tag and add child tid
+    // if not already in list.
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadChildren($content_tag_target_id);
+    foreach ($terms as $term) {
+      if (!in_array($term->get('tid')->value, $unique_content_tag_ids)) {
+        $unique_content_tag_ids[] = $term->get('tid')->value;
+      }
+    }
+
+    $query->condition('field_article_content_tag.target_id', $unique_content_tag_ids, 'IN');
+  }
+
+  $nids = $query->accessCheck(TRUE)->execute();
+  $node_storage = \Drupal::service('entity_type.manager')->getStorage('node');
+  $nodes = $node_storage->loadMultiple($nids);
+
+  if (!empty($nodes)) {
+    $unique_category_option_ids = [];
+    $unique_topic_option_ids = [];
+    $unique_author_option_ids = [];
+
+    // For each node, get and create filter option arrays.
+    foreach ($nodes as $node) {
+      // Find article category options.
+      $categories = array_column($node->field_article_category->getValue(), 'target_id');
+      if (!empty($categories)) {
+        foreach ($categories as $key => $category) {
+          if (!in_array($category, $unique_category_option_ids)) {
+            $unique_category_option_ids[] = $category;
+          }
+        }
+      }
+
+      // Find article topic options.
+      $topics = array_column($node->field_article_topic->getValue(), 'target_id');
+      if (!empty($topics)) {
+        foreach ($topics as $key => $topic) {
+          if (!in_array($topic, $unique_topic_option_ids)) {
+            $unique_topic_option_ids[] = $topic;
+          }
+        }
+      }
+
+      // Find article author options.
+      $authors = array_column($node->field_article_byline_author->getValue(), 'target_id');
+      if (!empty($authors)) {
+        foreach ($authors as $key => $author) {
+          if (!in_array($author, $unique_author_option_ids)) {
+            $unique_author_option_ids[] = $author;
+          }
+        }
+      }
+    }
+
+    // Get result categories options.
+    if (!empty($unique_category_option_ids)) {
+      $unique_category_option_ids = array_unique($unique_category_option_ids);
+      $unique_category_option_ids = _du_site_get_term_names(array_flip($unique_category_option_ids), TRUE);
+      $ret_array['category_options'] = $unique_category_option_ids;
+    }
+
+    // Get result topics options.
+    if (!empty($unique_topic_option_ids)) {
+      $unique_topic_option_ids = array_unique($unique_topic_option_ids);
+      $unique_topic_option_ids = _du_site_get_term_names(array_flip($unique_topic_option_ids), TRUE);
+      $ret_array['topic_options'] = $unique_topic_option_ids;
+    }
+
+    // Get result author options.
+    if (!empty($unique_author_option_ids)) {
+      $unique_author_option_ids = array_unique($unique_author_option_ids);
+      $unique_author_option_ids = _du_site_get_term_names(array_flip($unique_author_option_ids), TRUE);
+      $ret_array['author_options'] = $unique_author_option_ids;
+    }
+  }
+
+  return $ret_array;
+}

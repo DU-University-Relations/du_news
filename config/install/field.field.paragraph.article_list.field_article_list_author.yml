@@ -1,0 +1,31 @@
+uuid: 06314402-f1c4-4e58-a9a7-a22a2b42a22b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_article_list_author
+    - paragraphs.paragraphs_type.article_list
+    - taxonomy.vocabulary.author
+_core:
+  default_config_hash: bfBxazmAIYvdFX7LOmLFWRQOealfppEXTM3FquGbKaE
+id: paragraph.article_list.field_article_list_author
+field_name: field_article_list_author
+entity_type: paragraph
+bundle: article_list
+label: Author
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      author: author
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

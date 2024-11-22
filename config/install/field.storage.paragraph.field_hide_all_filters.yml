@@ -1,0 +1,18 @@
+uuid: 5713b9a9-a225-4544-910f-719de3ac6553
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+id: paragraph.field_hide_all_filters
+field_name: field_hide_all_filters
+entity_type: paragraph
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

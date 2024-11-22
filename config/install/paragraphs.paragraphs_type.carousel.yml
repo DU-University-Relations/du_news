@@ -1,0 +1,12 @@
+uuid: 26183e3f-4d82-4622-970a-ea6707114953
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: buh-ub4NIS42M555I7zdMKkk8xNak063hWo_t2azzZg
+id: carousel
+label: Carousel
+icon_uuid: null
+icon_default: null
+description: 'Use to add a Carousel or Slideshow.'
+behavior_plugins: {  }

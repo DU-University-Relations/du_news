@@ -1,0 +1,23 @@
+uuid: e47e9bb2-cade-4a12-9a48-9166bbb073e9
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_hide_keyword_search
+    - paragraphs.paragraphs_type.article_list
+id: paragraph.article_list.field_hide_keyword_search
+field_name: field_hide_keyword_search
+entity_type: paragraph
+bundle: article_list
+label: 'Hide Keyword Search'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

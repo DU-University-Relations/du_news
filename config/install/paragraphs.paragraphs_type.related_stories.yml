@@ -1,0 +1,12 @@
+uuid: 2f3709e0-c3d5-4cd5-a27e-b49309608053
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: kqxyGh56WutX6yF8zeVvo6aGo9bzVykLPSs6JW1fTR8
+id: related_stories
+label: 'Related Snippets'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

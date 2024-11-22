@@ -1,0 +1,29 @@
+uuid: 7ec7cd7f-d269-4a8a-83ef-74f4c18834d2
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_article_list_content_tag
+    - paragraphs.paragraphs_type.article_list
+    - taxonomy.vocabulary.content_tags
+id: paragraph.article_list.field_article_list_content_tag
+field_name: field_article_list_content_tag
+entity_type: paragraph
+bundle: article_list
+label: 'Content Tag'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      content_tags: content_tags
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

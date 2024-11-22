@@ -1,0 +1,12 @@
+uuid: 24411472-52ec-4b2e-9af3-2ad7695c7a5a
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: c3Pu0TSX6dA-9JFHAmibOFYaxLrvsLtmLgz0j3CJLgc
+id: quick_facts
+label: 'Quick Facts'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

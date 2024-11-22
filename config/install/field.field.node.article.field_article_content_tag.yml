@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_article_content_tag
+    - node.type.article
+    - taxonomy.vocabulary.content_tags
+_core:
+  default_config_hash: 1kEbbh4WN17R_7xP6l18NjXfSTRx8vK45ZsX6tAT1FA
+id: node.article.field_article_content_tag
+field_name: field_article_content_tag
+entity_type: node
+bundle: article
+label: 'Content Tags'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      content_tags: content_tags
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

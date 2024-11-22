@@ -1,0 +1,12 @@
+uuid: b432d0ac-8efa-4fbf-9cb6-ef4ef513648c
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: odUWIr0HSvoauZxf9u8reRkSRZnmGfPUXa93HV0bDa4
+id: featured_event
+label: 'Featured Events - Card'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

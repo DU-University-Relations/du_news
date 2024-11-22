@@ -1,0 +1,12 @@
+uuid: 41585900-97eb-48bf-a3a4-373a2595648a
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: x3oc3GxNNr80axRnFmi0kJVcDaX8q9KqnrpObeUziUk
+id: homepage_quote
+label: Quote
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

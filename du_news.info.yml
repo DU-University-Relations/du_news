@@ -1,0 +1,26 @@
+name: 'DU News'
+type: module
+description: 'Custom package for managing Articles/News.'
+core_version_requirement: ^10
+package: 'Custom'
+dependencies:
+  - drupal:paragraphs
+  - drupal:entity_reference_revisions
+  - drupal:link_attributes
+  - drupal:text
+  - drupal:options
+  - drupal:svg_image
+  - drupal:entity_browser
+  - drupal:field_group
+  - drupal:allowed_formats
+  - drupal:ds
+  - drupal:dropzonejs
+  - drupal:ebrsww
+  - drupal:file_browser
+  - drupal:du_widen
+  - drupal:shs
+  - drupal:lightning_core
+  - drupal:lightning_media
+  - drupal:media
+  - drupal:views_infinite_scroll
+  - drupal:views_taxonomy_term_name_depth

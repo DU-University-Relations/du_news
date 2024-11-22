@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: bpO4elPedGGDFqYk0a5bhMPQjeXeqWbNrthO7ONZzXw
+name: 'Article Authors'
+vid: author
+description: ''
+weight: 0

@@ -1,0 +1,23 @@
+uuid: ad9e550c-0c2f-4349-b438-651df5d6d70f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_hide_all_filters
+    - paragraphs.paragraphs_type.article_list
+id: paragraph.article_list.field_hide_all_filters
+field_name: field_hide_all_filters
+entity_type: paragraph
+bundle: article_list
+label: 'Hide All Filters'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

@@ -1,0 +1,22 @@
+uuid: c44f6940-6158-4d65-88b5-c7d7eb9d63be
+langcode: en
+status: true
+dependencies:
+  module:
+    - paragraphs
+    - taxonomy
+_core:
+  default_config_hash: Bbz6CvvLgCy5E2qB6FcSIN4PeYyWQHg9hBgNzoLVWck
+id: paragraph.field_article_list_author
+field_name: field_article_list_author
+entity_type: paragraph
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

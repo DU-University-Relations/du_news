@@ -1,0 +1,31 @@
+uuid: 233eb1b2-cf33-4bdb-9c46-4f46eca772c3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_article_list_category
+    - paragraphs.paragraphs_type.article_list
+    - taxonomy.vocabulary.article_categories
+_core:
+  default_config_hash: FezWictPiQSQxRGNGQpUq0muhj0iAZb5I38_SmYEHus
+id: paragraph.article_list.field_article_list_category
+field_name: field_article_list_category
+entity_type: paragraph
+bundle: article_list
+label: Category
+description: 'Select one term to make that the default term selected. Select more than one term to limit the available options to only the selected terms.'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      article_categories: article_categories
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

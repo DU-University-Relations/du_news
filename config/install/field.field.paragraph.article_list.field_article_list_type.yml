@@ -1,0 +1,29 @@
+uuid: a5821be8-8136-464b-9846-69a25cb0b0d7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_article_list_type
+    - paragraphs.paragraphs_type.article_list
+    - taxonomy.vocabulary.article_type
+id: paragraph.article_list.field_article_list_type
+field_name: field_article_list_type
+entity_type: paragraph
+bundle: article_list
+label: 'Article Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      article_type: article_type
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

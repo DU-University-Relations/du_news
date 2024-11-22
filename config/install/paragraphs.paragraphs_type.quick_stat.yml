@@ -1,0 +1,10 @@
+uuid: c426e646-9ffb-4062-aaa3-c211c6520b23
+langcode: en
+status: true
+dependencies: {  }
+id: quick_stat
+label: 'Quick Stat'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

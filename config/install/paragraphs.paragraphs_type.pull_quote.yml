@@ -1,0 +1,12 @@
+uuid: 99486d90-49fb-48cc-a00f-f5b33d61e445
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: HSh0R3EuE2m7NVzpz6FkfwHmxxZkmbs8gsWJjYVpSPY
+id: pull_quote
+label: 'Pull Quote'
+icon_uuid: null
+icon_default: null
+description: 'Pullquotes can be used in pages or Articles'
+behavior_plugins: {  }

@@ -1,0 +1,26 @@
+uuid: 0f758dd7-8cec-433c-8680-3304787d5819
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.article_list
+  module:
+    - views
+  theme:
+    - pl_drupal
+_core:
+  default_config_hash: '-PnzNolj2ZC__axXpeuZQ7uDvtLlFG35GbJXxdgLtPg'
+id: views_block__article_list_block_1
+theme: pl_drupal
+region: hidden
+weight: 0
+provider: null
+plugin: 'views_block:article_list-block_1'
+settings:
+  id: 'views_block:article_list-block_1'
+  label: ''
+  provider: views
+  label_display: '0'
+  views_label: ''
+  items_per_page: none
+visibility: {  }

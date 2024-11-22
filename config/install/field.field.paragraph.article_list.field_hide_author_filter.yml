@@ -1,0 +1,23 @@
+uuid: 23b0d18c-ce3b-4a23-86e1-dabea6ef2d44
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_hide_author_filter
+    - paragraphs.paragraphs_type.article_list
+id: paragraph.article_list.field_hide_author_filter
+field_name: field_hide_author_filter
+entity_type: paragraph
+bundle: article_list
+label: 'Hide Author Filter'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

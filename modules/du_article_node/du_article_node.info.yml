@@ -1,0 +1,9 @@
+name: 'Article Node'
+type: module
+core_version_requirement: ^8 || ^9 || ^10
+dependencies:
+  - field
+  - node
+  - path
+  - pathauto
+  - views

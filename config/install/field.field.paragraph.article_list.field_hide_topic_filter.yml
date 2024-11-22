@@ -1,0 +1,23 @@
+uuid: 0564fe85-d82a-4c9f-b4db-b55ad2dca52c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_hide_topic_filter
+    - paragraphs.paragraphs_type.article_list
+id: paragraph.article_list.field_hide_topic_filter
+field_name: field_hide_topic_filter
+entity_type: paragraph
+bundle: article_list
+label: 'Hide Topic Filter'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

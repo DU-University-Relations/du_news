@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_article_usage_tag
+    - node.type.article
+    - taxonomy.vocabulary.article_usage_tag
+_core:
+  default_config_hash: fLh96ds2hdak7Bcmy4NoezigQCNDKtpvo_x8-F1LWFk
+id: node.article.field_article_usage_tag
+field_name: field_article_usage_tag
+entity_type: node
+bundle: article
+label: 'Article Usage Tag'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      article_usage_tag: article_usage_tag
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference
