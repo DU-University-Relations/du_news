@@ -1,0 +1,53 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.media
+    - views.view.widen
+  module:
+    - lightning_media
+    - views
+_core:
+  default_config_hash: JJHmBj7aN_8TKrNPmRURDz3ACyY2Wh7nyotuARHCLgM
+name: image_browser
+label: 'Image Browser'
+display: du_modal
+display_configuration:
+  width: ''
+  height: ''
+  link_text: 'Select Image(s)'
+  auto_open: false
+selection_display: no_display
+selection_display_configuration: {  }
+widget_selector: tabs
+widget_selector_configuration: {  }
+widgets:
+  44d52e51-9627-43b5-a637-3b0462041d1c:
+    id: upload
+    uuid: 44d52e51-9627-43b5-a637-3b0462041d1c
+    label: Upload
+    weight: -9
+    settings:
+      target_bundles: {  }
+      upload_validators: {  }
+      submit_text: Select
+      form_mode: media_browser
+      return_file: true
+  8c8ac73c-5993-4ebf-a275-36ff9674f134:
+    id: view
+    uuid: 8c8ac73c-5993-4ebf-a275-36ff9674f134
+    label: Library
+    weight: -10
+    settings:
+      submit_text: Select
+      auto_select: false
+      view: media
+      view_display: entity_browser_2
+  bbeec9e5-6719-4554-b726-03f30dee8096:
+    id: widen
+    uuid: bbeec9e5-6719-4554-b726-03f30dee8096
+    label: Widen
+    weight: 3
+    settings:
+      submit_text: 'Select entities'
+      auto_select: 0

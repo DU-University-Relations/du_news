@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: c3Pu0TSX6dA-9JFHAmibOFYaxLrvsLtmLgz0j3CJLgc
+id: quick_facts
+label: 'Quick Facts'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

@@ -1,0 +1,220 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_article_feature_media
+    - node.type.article
+    - paragraphs.paragraphs_type.feature_media_image
+    - paragraphs.paragraphs_type.feature_media_video
+  module:
+    - entity_reference_revisions
+_core:
+  default_config_hash: IYqvFnwtrGZYY18QP5a6_ZJwqlDqRsX49Xo9BKcEdKs
+id: node.article.field_article_feature_media
+field_name: field_article_feature_media
+entity_type: node
+bundle: article
+label: 'Feature Media'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      feature_media_image: feature_media_image
+      feature_media_video: feature_media_video
+    target_bundles_drag_drop:
+      academic_programs:
+        weight: 64
+        enabled: false
+      academic_programs_filter:
+        weight: 65
+        enabled: false
+      academic_programs_legend_def:
+        weight: 66
+        enabled: false
+      admission_steps:
+        weight: 67
+        enabled: false
+      admission_steps_in_content:
+        weight: 68
+        enabled: false
+      big_button:
+        weight: 69
+        enabled: false
+      block:
+        weight: 70
+        enabled: false
+      body_copy:
+        weight: 71
+        enabled: false
+      body_text:
+        weight: 72
+        enabled: false
+      button:
+        weight: 73
+        enabled: false
+      card:
+        weight: 74
+        enabled: false
+      cards:
+        weight: 75
+        enabled: false
+      carousel:
+        weight: 76
+        enabled: false
+      category_link:
+        weight: 77
+        enabled: false
+      category_menu:
+        weight: 78
+        enabled: false
+      contact:
+        weight: 79
+        enabled: false
+      contacts:
+        weight: 80
+        enabled: false
+      contact_single:
+        weight: 81
+        enabled: false
+      cta:
+        weight: 82
+        enabled: false
+      cta_group:
+        weight: 83
+        enabled: false
+      cta_inline:
+        weight: 84
+        enabled: false
+      embed_code:
+        weight: 85
+        enabled: false
+      event_list:
+        weight: 86
+        enabled: false
+      event_time_place:
+        weight: 87
+        enabled: false
+      expanding_list:
+        weight: 88
+        enabled: false
+      featured_event:
+        weight: 89
+        enabled: false
+      featured_event_slide:
+        weight: 90
+        enabled: false
+      featured_video_component:
+        weight: 91
+        enabled: false
+      feature_media:
+        weight: 92
+        enabled: false
+      feature_media_image:
+        enabled: true
+        weight: 93
+      feature_media_video:
+        enabled: true
+        weight: 94
+      hero_media:
+        weight: 95
+        enabled: false
+      hero_media_no_caption:
+        weight: 96
+        enabled: false
+      homepage_facts:
+        weight: 97
+        enabled: false
+      homepage_programs_search:
+        weight: 98
+        enabled: false
+      homepage_quote:
+        weight: 99
+        enabled: false
+      homepage_quotes:
+        weight: 100
+        enabled: false
+      homepage_section_copy:
+        weight: 101
+        enabled: false
+      homepage_swapping_image_feature:
+        weight: 102
+        enabled: false
+      homepage_video_carousel:
+        weight: 103
+        enabled: false
+      hvc_slide:
+        weight: 104
+        enabled: false
+      icon_link:
+        weight: 105
+        enabled: false
+      icon_list:
+        weight: 106
+        enabled: false
+      icon_list_item:
+        weight: 107
+        enabled: false
+      inset_video:
+        weight: 108
+        enabled: false
+      list_of_links:
+        weight: 109
+        enabled: false
+      pull_quote:
+        weight: 110
+        enabled: false
+      quick_facts:
+        weight: 111
+        enabled: false
+      quick_facts_feature_fact:
+        weight: 112
+        enabled: false
+      quick_facts_list_item_simple:
+        weight: 113
+        enabled: false
+      quick_facts_list_of_facts:
+        weight: 114
+        enabled: false
+      quick_stat:
+        weight: 115
+        enabled: false
+      quick_stats:
+        weight: 116
+        enabled: false
+      related_stories:
+        weight: 117
+        enabled: false
+      show_hide_toggle:
+        weight: 118
+        enabled: false
+      slide:
+        weight: 119
+        enabled: false
+      social_media_bar:
+        weight: 120
+        enabled: false
+      stories:
+        weight: 121
+        enabled: false
+      subhead:
+        weight: 122
+        enabled: false
+      testimonials_spotlight:
+        weight: 123
+        enabled: false
+      two_col_copy:
+        weight: 124
+        enabled: false
+      two_value_text:
+        weight: 125
+        enabled: false
+      webform:
+        weight: 126
+        enabled: false
+field_type: entity_reference_revisions

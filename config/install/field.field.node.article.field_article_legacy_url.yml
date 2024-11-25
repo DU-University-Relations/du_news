@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_article_legacy_url
+    - node.type.article
+_core:
+  default_config_hash: LF7ElZrNvziZ0XJNQV12iBmpFcXua8EEuVDnBvPliPM
+id: node.article.field_article_legacy_url
+field_name: field_article_legacy_url
+entity_type: node
+bundle: article
+label: 'Legacy URL'
+description: 'Please don''t add the base URL, e.g: for "http://news.du.edu/this-is-a-news-story" add only "this-is-a-news-story"'
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

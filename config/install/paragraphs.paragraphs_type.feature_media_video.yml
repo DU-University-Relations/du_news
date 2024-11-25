@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: fpzEal35ZbuI_Xht254nMp6wQ2eqMKJzo-5aoXAuIiE
+id: feature_media_video
+label: 'Feature Media Video'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: l6GCGkAgdwdn5tPLWK0AeSOguG1ve0T2xfec3iV-xhA
+name: 'Article Usage Tag'
+vid: article_usage_tag
+description: ''
+weight: 0

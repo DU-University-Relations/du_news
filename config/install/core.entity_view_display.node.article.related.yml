@@ -1,0 +1,86 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.related
+    - field.field.node.article.body
+    - field.field.node.article.field_article_byline_author
+    - field.field.node.article.field_article_category
+    - field.field.node.article.field_article_content_tag
+    - field.field.node.article.field_article_feature_media
+    - field.field.node.article.field_article_legacy_url
+    - field.field.node.article.field_article_medium_sized_image
+    - field.field.node.article.field_article_publish_date
+    - field.field.node.article.field_article_related
+    - field.field.node.article.field_article_subhead
+    - field.field.node.article.field_article_teaser
+    - field.field.node.article.field_article_thumbnail_image
+    - field.field.node.article.field_article_topic
+    - field.field.node.article.field_article_type
+    - field.field.node.article.field_article_usage_tag
+    - field.field.node.article.field_back_link_text
+    - field.field.node.article.field_content_gallery_image
+    - field.field.node.article.field_meta_tags
+    - field.field.node.article.field_page_content
+    - field.field.node.article.field_page_overview
+    - field.field.node.article.field_unit
+    - node.type.article
+  module:
+    - svg_image
+    - user
+_core:
+  default_config_hash: XdsA5SQkNfQ-nOIUys0hwLu-Aa-4I3hTA4Ph-3FUMco
+id: node.article.related
+targetEntityType: node
+bundle: article
+mode: related
+content:
+  field_article_thumbnail_image:
+    type: image
+    label: above
+    settings:
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
+      svg_attributes:
+        width: null
+        height: null
+      svg_render_as_image: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+  field_article_type:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: false
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 2
+    region: content
+hidden:
+  body: true
+  content_moderation_control: true
+  field_article_byline_author: true
+  field_article_category: true
+  field_article_content_tag: true
+  field_article_feature_media: true
+  field_article_legacy_url: true
+  field_article_medium_sized_image: true
+  field_article_publish_date: true
+  field_article_related: true
+  field_article_subhead: true
+  field_article_teaser: true
+  field_article_topic: true
+  field_article_usage_tag: true
+  field_back_link_text: true
+  field_content_gallery_image: true
+  field_meta_tags: true
+  field_page_content: true
+  field_page_overview: true
+  field_unit: true

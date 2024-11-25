@@ -4,5 +4,26 @@
   "keywords":         ["University of Denver", "drupal"],
   "homepage":         "http://www.du.edu",
   "license":          "GPL-2.0+",
-  "type":             "drupal-module"
+  "type":             "drupal-module",
+  "require": {
+    "drupal/shs": "^3.0",
+    "drupal/views_taxonomy_term_name_depth": "7.2.0",
+    "drupal/paragraphs": "^1.18",
+    "drupal/entity_reference_revisions": "^1.12",
+    "drupal/link_attributes": "^2.1",
+    "drupal/svg_image": "^3.1",
+    "drupal/entity_browser": "^2.11",
+    "drupal/field_group": "^3.6",
+    "drupal/allowed_formats": "^3.0",
+    "drupal/ds": "^3.16",
+    "drupal/dropzonejs": "^2.11",
+    "drupal/ebrsww": "^2.3",
+    "drupal/file_browser": "^1.1",
+    "drupal/lightning_core": "^6",
+    "drupal/lightning_media": "^5",
+    "drupal/views_infinite_scroll": "^2.0"
+  },
+  "extra": {
+      "_README": "DU News package"
+  }
 }

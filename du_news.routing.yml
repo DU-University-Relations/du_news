@@ -1,0 +1,6 @@
+du_news.default:
+  path: '/admin/config/services/du-news'
+  defaults:
+    _title: 'DU News'
+  requirements:
+    _permission: 'administer site configuration'

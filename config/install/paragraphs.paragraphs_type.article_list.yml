@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: LOyqhbVZ1yasjO_wWRr8EdmDWyLCvI6LZDUd9sHY5j4
+id: article_list
+label: 'Article List'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

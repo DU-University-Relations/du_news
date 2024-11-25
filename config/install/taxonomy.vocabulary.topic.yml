@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: '-vtb1Zvkyqet4zdXJxhfCHebl3wk4oTjK0A9ldMzlAI'
+name: Topic
+vid: topic
+description: ''
+weight: 0

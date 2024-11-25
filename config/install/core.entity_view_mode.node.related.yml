@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - lightning_core
+    - node
+third_party_settings:
+  lightning_core:
+    description: ''
+_core:
+  default_config_hash: 4XByCBjCanw6RsDHXmf14HuzvkxHGCTcjXhqb6BGiUc
+id: node.related
+label: Related
+targetEntityType: node
+cache: true

@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: _hB5DZ1ZRy2l0daG_FPhwPpslpn_Wcjf6-Gvj72XbR8
+name: 'Article Categories'
+vid: article_categories
+description: ''
+weight: 0
