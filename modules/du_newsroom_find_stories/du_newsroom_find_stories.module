@@ -1,0 +1,194 @@
+<?php
+
+/**
+ * @file
+ * Defines business logic for DU Newsroom Find Stories.
+ */
+
+use Drupal\taxonomy\Entity\Term;
+use Drupal\views\Views;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function du_newsroom_find_stories_preprocess_paragraph__news_find_stories_by_category(&$variables) {
+
+  // Get article categories.
+  $tree = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree(
+    'article_categories', 0, 1, TRUE
+  );
+
+  $terms = [];
+
+  foreach ($tree as $term) {
+    $terms[] = $term->get('tid')->getString();
+    $taxonomy[] = $term;
+  }
+  $variables['categories'] = $terms;
+
+  // Query to get Stories by Category and put them in an array.
+  $article_collection = [];
+
+  $c = 0;
+  foreach ($terms as $term) {
+    $article_collection[$c]['term'] = $term;
+    $term_object = Term::load($term);
+    if (strtolower($term_object->getName()) != "internal") {
+      $article_collection[$c]['term_name'] = $term_object->getName();
+      $article_collection[$c]['path'] = '/taxonomy/term/' . $term;
+      $articles = get_news_stories_by_category($term);
+      $stories = NULL;
+      $stories = [];
+      $i = 0;
+      foreach ($articles as $n) {
+        $nid = $n->id();
+        $stories[$i]['nid'] = $nid;
+        $stories[$i]['title'] = $n->title->value;
+        $stories[$i]['path'] = $n->path->first()->alias ?? NULL;
+        $i++;
+      }
+      $article_collection[$c]['stories'] = $stories;
+      $c++;
+    }
+  }
+
+  $variables['stories'] = $article_collection;
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function du_newsroom_find_stories_preprocess_paragraph__news_find_stories_search(&$variables) {
+  $view = Views::getView('news_article_find_stories_search');
+  if (is_object($view)) {
+    $view->setArguments([]);
+    $items_per_page = $view->getItemsPerPage();
+    $view->setItemsPerPage($items_per_page);
+    $view->setDisplay('block_1');
+    $view->preExecute();
+    $view->execute();
+    $content = $view->buildRenderable('block_1', []);
+    $variables['content']['news_article_find_stories_search'] = $content;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function du_newsroom_find_stories_form_views_exposed_form_alter(&$form, $form_state, $form_id) {
+  $storage = $form_state->getStorage();
+  if (!empty($storage['view'])) {
+    $view = $storage['view'];
+    if ($view->id() == 'news_article_find_stories_search' && $view->current_display == 'block_1') {
+      $form['news_articles_search_api_fulltext']['#attributes']['class'][] = 'news-article-find-stories-fulltext';
+      $form['news_articles_search_api_fulltext']['#size'] = NULL;
+      $form['news_articles_search_api_fulltext']['#maxlength'] = NULL;
+      $form['actions']['submit']['#attributes']['class'][] = 'news-article-find-stories-submit';
+      $form['actions']['submit']['#value'] = '';
+      $form['actions']['submit']['#prefix'] = "<div class='news-article-find-stories-submit-container'><span class='icon-du-cust-search'>";
+      $form['actions']['submit']['#suffix'] = "</span></div>";
+    }
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function du_newsroom_find_stories_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  if ($view->id() === 'article_list' && $view->current_display === 'page_1') {
+    $valid_authors = valid_authors();
+    $author_tid_query = \Drupal::entityQuery('taxonomy_term')
+      ->condition('status', 1)
+      ->condition('vid', 'author')
+      ->condition('name', $valid_authors, 'IN');
+    $tids = $author_tid_query->accessCheck(TRUE)->execute();
+    if ($tids) {
+      $definition = [
+        'table' => 'node__field_article_byline_author',
+        'field' => 'entity_id',
+        'left_table' => 'node_field_data',
+        'left_field' => 'nid',
+      ];
+      $join = Drupal::service('plugin.manager.views.join')->createInstance('standard', $definition);
+      $query->addRelationship('byline_author', $join, 'node_field_data');
+      $query->addWhere(0, 'byline_author.field_article_byline_author_target_id', array_values($tids), 'IN');
+    }
+  }
+}
+
+/**
+ * Defines a query that returns articles by provided category.
+ */
+function get_news_stories_by_category($term) {
+  $valid_authors = valid_authors();
+
+  $query = \Drupal::entityQuery('node')
+    ->condition('status', 1)
+    ->condition('type', 'article')
+    ->condition('field_article_category', $term)
+    ->condition('field_article_byline_author.entity.name', $valid_authors, "IN")
+    ->sort('created', 'DESC')
+    ->pager(3);
+  $nids = $query->accessCheck(TRUE)->execute();
+  $articles = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($nids);
+
+  return $articles;
+}
+
+/**
+ * Defines a static list of valid authors.
+ */
+function valid_authors() {
+  return [
+    'Jon Stone',
+    'Nika Anschuetz',
+    'Matt Meyer',
+    'Emma Atkinson',
+    'Connor Mokrzycki',
+    'Heather Hein',
+    'Joy Hamilton',
+    'Gretchen Pressley',
+    'Janette Ballard',
+    'Curt Olson',
+    'Eliott Grover',
+    'Steve Koppes',
+    'MeiLi Smith',
+    'Wayne Armstrong',
+    'RadioEd',
+    'Karla Turner',
+    'Sarah Satterwhite',
+    'Niko Blankenship',
+    'Greg Glasgow',
+    'Lorne Fultonberg',
+    'Meghan Franklin',
+    'Nicholas Greenhalgh',
+    'Theresa Ahrens',
+    'Madeline Phipps',
+    'Jeff Haessler',
+    'Alyssa Hurst',
+    'Justin Beach',
+    'Annetta Crecelius',
+    'Jason Evans',
+    'Jeremy Jones',
+    'David Kail',
+    'Chris Wiger',
+    'Tamara Chapman',
+    'Nicole Gordon',
+    'Maria Kuntz',
+    'Kristal Griffith',
+    'Laura Miller',
+    'Kateri McRae',
+    'Nicole Militello',
+    'Billie Stanton Anleu',
+    'Barbara Brooks',
+    'Thomas Sloan',
+    'Octavio Gonzalez',
+    'Jeremy Haefner',
+    'University of Denver',
+    'Renea Morris',
+    'Mary Clark',
+    'Jordyn Reiland',
+  ];
+}

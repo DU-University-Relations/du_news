@@ -1,0 +1,25 @@
+uuid: 7c4af87a-ee0e-4c21-966e-a48705688595
+langcode: en
+status: true
+dependencies:
+  theme:
+    - pl_drupal
+  module:
+    - du_newsroom_find_stories
+_core:
+  default_config_hash: _13xHv_0Hmw9DHerFLd6tSQs7S1EI3tbVMu8LRGZwmg
+id: dunewsstoriesbycategory
+theme: pl_drupal
+region: hidden
+weight: 0
+provider: null
+plugin: du_news_stories_by_category_block
+settings:
+  id: du_news_stories_by_category_block
+  label: 'DU Find News Stories by Category'
+  provider: du_newsroom_find_stories
+  label_display: '0'
+  status: true
+  info: ''
+  view_mode: full
+visibility: {  }

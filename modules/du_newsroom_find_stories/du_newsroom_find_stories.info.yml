@@ -1,0 +1,7 @@
+name: 'DU Newsroom Find Stories'
+description: 'Contains search functionality for DU Newsroom Find Stories'
+type: module
+core_version_requirement: ^8 || ^9 || ^10
+dependencies:
+  - block
+package: du
