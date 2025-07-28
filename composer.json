@@ -2,7 +2,7 @@
   "name":             "university-of-denver/du_news",
   "description":      "Package of News Related Features",
   "keywords":         ["University of Denver", "drupal"],
-  "version": "10.18.1",
+  "version": "10.18.2",
   "homepage":         "http://www.du.edu",
   "license":          "GPL-2.0+",
   "type":             "drupal-module",
