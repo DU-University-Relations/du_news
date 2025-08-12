@@ -3,13 +3,13 @@ langcode: en
 status: true
 dependencies:
   theme:
-    - pl_drupal
+    - du_bootstrap
   module:
     - du_newsroom_find_stories
 _core:
   default_config_hash: _13xHv_0Hmw9DHerFLd6tSQs7S1EI3tbVMu8LRGZwmg
 id: dunewsstoriesbycategory
-theme: pl_drupal
+theme: du_bootstrap
 region: hidden
 weight: 0
 provider: null
