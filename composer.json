@@ -8,7 +8,7 @@
   "type":             "drupal-module",
   "require": {
     "drupal/shs": "^2.0||^3.0",
-    "drupal/views_taxonomy_term_name_depth": "7.2.0",
+    "drupal/views_taxonomy_term_name_depth": "^7.2",
     "drupal/paragraphs": "^1.18",
     "drupal/entity_reference_revisions": "^1.12",
     "drupal/link_attributes": "^2.1",
