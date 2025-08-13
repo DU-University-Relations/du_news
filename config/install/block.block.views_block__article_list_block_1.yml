@@ -6,11 +6,11 @@ dependencies:
   module:
     - views
   theme:
-    - pl_drupal
+    - du_bootstrap
 _core:
   default_config_hash: '-PnzNolj2ZC__axXpeuZQ7uDvtLlFG35GbJXxdgLtPg'
 id: views_block__article_list_block_1
-theme: pl_drupal
+theme: du_bootstrap
 region: hidden
 weight: 0
 provider: null
